@@ -53,3 +53,13 @@ export function getBconfig() {
     method: 'get'
   })
 }
+
+
+//导入站点
+export function upload_web(data) {
+  return request({
+    url: '/api/blackboxcfg/upload_web',
+    method: 'get',
+    data
+  })
+}

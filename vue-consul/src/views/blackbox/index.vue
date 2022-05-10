@@ -1,9 +1,9 @@
 <template>
-  <div class="app-container">
+  <div class="app-container" >
     <el-alert type="success" center close-text="知道了">
       <el-link icon="el-icon-warning" type="success" href="https://github.com/starsliao/ConsulManager/blob/main/docs/blackbox%E7%AB%99%E7%82%B9%E7%9B%91%E6%8E%A7.md" target="_blank">应用场景：如何优雅的使用Consul管理Blackbox站点监控</el-link>
     </el-alert>
-    <div class="filter-container">
+    <div class="filter-container" style="flex: 1;display: flex;align-items: center;height: 100px;">
       <el-select v-model="listQuery.module" placeholder="监控类型" clearable collapse-tags style="width: 150px" class="filter-item">
         <el-option v-for="item in module_list" :key="item" :label="item" :value="item" />
       </el-select>
@@ -19,16 +19,38 @@
       <el-tooltip class="item" effect="light" content="点击清空查询条件" placement="top">
         <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-refresh" circle @click="handleReset" />
       </el-tooltip>
+      
       <el-button class="filter-item" type="primary" icon="el-icon-edit" @click="handleCreate">
         新增
       </el-button>
+
+      
       <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
         导出
       </el-button>
-      <el-button class="filter-item" type="danger" icon="el-icon-delete" @click="handleDelAll">
+
+      <!-- 导入按钮 -->
+      <el-upload
+          style="margin-right: 10px;"
+          class="upload-demo"
+          action="/api/blackboxcfg/upload_web"
+          :on-success="success"
+          :on-error="error"
+          accept=".xlsx"
+          :show-file-list="false"
+          multiple
+          :limit="3"
+          >
+          <el-button v-waves style="margin-left: 10px;" :loading="downloadLoading" class="filter-item" type="success" icon="el-icon-upload2" >
+            导入
+      </el-button>
+      </el-upload>
+       
+
+      <el-button class="filter-item"  type="danger" icon="el-icon-delete" @click="handleDelAll">
         批量删除
       </el-button>
-      <div style="float: right;">
+      <div style="float: right;margin-left: 10px;">
         <el-input v-model="iname" prefix-icon="el-icon-search" placeholder="请输入名称或实例进行筛选" clearable style="width:230px" class="filter-item" @input="inameFilter(iname)" />
       </div>
     </div>
@@ -141,7 +163,7 @@
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
-import { getAllList, getAllInfo, addService, updateService, delService } from '@/api/blackbox'
+import { getAllList, getAllInfo, addService, updateService, delService, upload_web } from '@/api/blackbox'
 export default {
   name: 'ComplexTable',
   components: { Pagination },
@@ -251,6 +273,29 @@ export default {
   },
 
   methods: {
+    //导入成功
+    success(response){
+      if (response.code == 20000){
+        this.$message({
+                message: response.data,
+                type: "success",
+              });
+      }else{
+        this.$message({
+              message: response.data,
+              type: "error",
+            });
+      }
+        
+    },
+    //导入失败
+    error(response){
+      if (response.code == 40000){
+        
+      }
+      
+    },
+
     inameFilter(iname) {
       if (iname === '') {
         this.handleFilter()
@@ -506,6 +551,9 @@ export default {
       }
       return this.value_env
     }
-  }
+  },
 }
 </script>
+
+<style scoped>
+</style>

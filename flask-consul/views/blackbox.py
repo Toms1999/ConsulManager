@@ -1,6 +1,10 @@
 from flask import Blueprint
 from flask_restful import reqparse, Resource, Api
+from werkzeug.datastructures import  FileStorage
 import sys
+
+from units.input import with_open_file, read_execl
+
 sys.path.append("..")
 from units import token_auth,blackbox_manager
 
@@ -16,6 +20,8 @@ parser.add_argument('name',type=str)
 parser.add_argument('instance',type=str)
 parser.add_argument('del_dict',type=dict)
 parser.add_argument('up_dict',type=dict)
+parser.add_argument('file',required=True, type=FileStorage, location="files", help="File is wrong.")
+
 
 class GetAllList(Resource):
     @token_auth.auth.login_required
@@ -57,6 +63,26 @@ class BlackboxApi(Resource):
         args = parser.parse_args()
         return blackbox_manager.del_service(args['module'],args['company'],args['project'],args['env'],args['name'])
 
+
+"""
+导入站点接口
+"""
+class Blackbox_Upload_Web(Resource):
+
+    def post(self):
+        file = parser.parse_args().get("file")
+        try:
+            file.save(file.filename)
+            print(file.filename)
+            read_execl(path=file.filename)
+        except Exception as e:
+            print("导入失败",e)
+            return {"code": 40000, "data": f"导入失败！"}
+        return {"code": 20000, "data": f"导入成功！"}
+
+
+
 api.add_resource(GetAllList,'/api/blackbox/alllist')
 api.add_resource(BlackboxApi, '/api/blackbox/service')
 api.add_resource(GetConfig,'/api/blackboxcfg/<stype>')
+api.add_resource(Blackbox_Upload_Web,'/api/blackboxcfg/upload_web')

@@ -40,7 +40,9 @@ def put_kv(path,value):
     url = f'{consul_url}/kv/{path}'
     payload = json.dumps(value,ensure_ascii=False).encode("utf-8")
     response = requests.put(url, headers=headers, data=payload)
+    print(response)
     return response.json()
+
 
 def del_key(path):
     url = f'{consul_url}/kv/{path}'
